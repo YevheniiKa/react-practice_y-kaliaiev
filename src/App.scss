@@ -1,18 +1,22 @@
 iframe {
   display: none;
 }
+
 a:hover {
   color: white;
 }
+
 .button.is-link.is-outlined:hover {
-  background-color: #3273dc;
   color: white;
+  background-color: #3273dc;
   border-color: #3273dc;
 }
+
 a[data-cy='AllCategories'] {
-  border-color: #3ec487;
   color: #3ec487;
+  border-color: #3ec487;
 }
+
 a[data-cy='AllCategories'].is-success {
   color: black;
 }
