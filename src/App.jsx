@@ -10,7 +10,7 @@ export const App = () => {
   const [selectUser, setUser] = useState('all');
   const [query, setQuery] = useState('');
   const lowerQuery = query.toLowerCase().trim();
-  const [sortState, setSortState] = useState('none');
+  // const [sortState, setSortState] = useState('none');
   const [selectedCategories, setSelectedCategories] = useState(['all']);
 
   const products = productsFromServer.map(product => {
@@ -138,7 +138,7 @@ export const App = () => {
                   <a
                     key={category.id}
                     href="#/"
-                    data-cy="AllCategories"
+                    data-cy="Category"
                     className={cn('button mr-2 ', {
                       'is-info': selectedCategories.includes(category.title),
                     })}
