@@ -10,7 +10,7 @@ export const App = () => {
   const [selectUser, setUser] = useState('all');
   const [query, setQuery] = useState('');
   const lowerQuery = query.toLowerCase().trim();
-
+  const [isReverse, setIsReverse] = useState(false);
   const products = productsFromServer.map(product => {
     const category = categoriesFromServer.find(
       c => c.id === product.categoryId,
@@ -27,8 +27,10 @@ export const App = () => {
       product.name.toLowerCase().includes(lowerQuery) ||
       (product.description &&
         product.description.toLowerCase().includes(lowerQuery));
+
     const matchesUser =
-      selectUser === 'all' || (product.user && product.user.id === selectUser);
+      selectUser === 'all' ||
+      (product.user && String(product.user.id) === selectUser);
 
     return matchesQuery && matchesUser;
   });
@@ -57,9 +59,9 @@ export const App = () => {
                     data-cy="FilterAllUsers"
                     href="#/"
                     className={cn({
-                      'is-active': selectUser === `${user.name}`,
+                      'is-active': selectUser === `${user.id}`,
                     })}
-                    onClick={() => setUser(`${user.name}`)}
+                    onClick={() => setUser(String(user.id))}
                   >
                     {user.name}
                   </a>
@@ -74,7 +76,7 @@ export const App = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  onChange={event => setQuery(event.CurrentTarget.value)}
+                  onChange={event => setQuery(event.currentTarget.value)}
                 />
 
                 <span className="icon is-left">
@@ -105,7 +107,7 @@ export const App = () => {
                   <a
                     href="#/"
                     data-cy="AllCategories"
-                    className="button is-success mr-6 is-outlined"
+                    className="button is-success mr-2 is-outlined"
                   >
                     {category.title}
                   </a>
@@ -126,10 +128,6 @@ export const App = () => {
         </div>
 
         <div className="box table-container">
-          {/* <p data-cy="NoMatchingMessage">
-            No products matching selected criteria
-          </p> */}
-
           <table
             data-cy="ProductTable"
             className="table is-striped is-narrow is-fullwidth"
@@ -141,7 +139,12 @@ export const App = () => {
                     ID
                     <a href="#/">
                       <span className="icon">
-                        <i data-cy="SortIcon" className="fas fa-sort" />
+                        <i
+                          data-cy="SortIcon"
+                          className={cn('fas', 'fa-sort', {
+                            'fa-sort-down': isReverse,
+                          })}
+                        />
                       </span>
                     </a>
                   </span>
@@ -152,7 +155,10 @@ export const App = () => {
                     Product
                     <a href="#/">
                       <span className="icon">
-                        <i data-cy="SortIcon" className="fas fa-sort-down" />
+                        <i
+                          data-cy="SortIcon"
+                          className="fas fa-sort fa-sort-down"
+                        />
                       </span>
                     </a>
                   </span>
@@ -163,7 +169,10 @@ export const App = () => {
                     Category
                     <a href="#/">
                       <span className="icon">
-                        <i data-cy="SortIcon" className="fas fa-sort-up" />
+                        <i
+                          data-cy="SortIcon"
+                          className="fas fa-sort fa-sort-down"
+                        />
                       </span>
                     </a>
                   </span>
@@ -199,6 +208,12 @@ export const App = () => {
                   )}
                 </tr>
               ))}
+              {visibleProducts.length === 0 && (
+                <p data-cy="NoMatchingMessage">
+                  <br />
+                  No products matching selected criteria
+                </p>
+              )}
             </tbody>
           </table>
         </div>
