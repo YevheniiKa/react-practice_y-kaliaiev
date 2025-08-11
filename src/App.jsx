@@ -6,15 +6,32 @@ import usersFromServer from './api/users';
 import categoriesFromServer from './api/categories';
 import productsFromServer from './api/products';
 
-// const products = productsFromServer.map((product) => {
-//   const category = null; // find by product.categoryId
-//   const user = null; // find by category.ownerId
-
-//   return null;
-// });
-
 export const App = () => {
   const [selectUser, setUser] = useState('all');
+  const [query, setQuery] = useState('');
+  const lowerQuery = query.toLowerCase().trim();
+
+  const products = productsFromServer.map(product => {
+    const category = categoriesFromServer.find(
+      c => c.id === product.categoryId,
+    );
+    const user = category
+      ? usersFromServer.find(u => u.id === category.ownerId)
+      : null;
+
+    return { ...product, category, user };
+  });
+
+  const visibleProducts = products.filter(product => {
+    const matchesQuery =
+      product.name.toLowerCase().includes(lowerQuery) ||
+      (product.description &&
+        product.description.toLowerCase().includes(lowerQuery));
+    const matchesUser =
+      selectUser === 'all' || (product.user && product.user.id === selectUser);
+
+    return matchesQuery && matchesUser;
+  });
 
   return (
     <div className="section">
@@ -30,6 +47,7 @@ export const App = () => {
                 data-cy="FilterAllUsers"
                 href="#/"
                 onClick={() => setUser(`all`)}
+                className={cn({ 'is-active': selectUser === 'all' })}
               >
                 All
               </a>
@@ -38,6 +56,9 @@ export const App = () => {
                   <a
                     data-cy="FilterAllUsers"
                     href="#/"
+                    className={cn({
+                      'is-active': selectUser === `${user.name}`,
+                    })}
                     onClick={() => setUser(`${user.name}`)}
                   >
                     {user.name}
@@ -53,7 +74,7 @@ export const App = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  onChange={event => setQuery(event.CurrentTarget.value)}
                 />
 
                 <span className="icon is-left">
@@ -105,9 +126,9 @@ export const App = () => {
         </div>
 
         <div className="box table-container">
-          <p data-cy="NoMatchingMessage">
+          {/* <p data-cy="NoMatchingMessage">
             No products matching selected criteria
-          </p>
+          </p> */}
 
           <table
             data-cy="ProductTable"
@@ -162,31 +183,22 @@ export const App = () => {
             </thead>
 
             <tbody>
-              {productsFromServer.map(product => {
-                const category = categoriesFromServer.find(
-                  c => c.id === product.categoryId,
-                );
-                const user = usersFromServer.find(
-                  u => u.id === category.ownerId,
-                );
-
-                return (
-                  <tr data-cy="Product">
-                    <td className="has-text-weight-bold" data-cy="ProductId">
-                      {product.id}
+              {visibleProducts.map(product => (
+                <tr key={product.id} data-cy="Product">
+                  <td className="has-text-weight-bold" data-cy="ProductId">
+                    {product.id}
+                  </td>
+                  <td data-cy="ProductName">{product.name}</td>
+                  {product.category && (
+                    <td data-cy="ProductCategory">{`${product.category.icon} - ${product.category.title}`}</td>
+                  )}
+                  {product.user && (
+                    <td data-cy="ProductUser" className="has-text-danger">
+                      {product.user.name}
                     </td>
-                    <td data-cy="ProductName">{product.name}</td>
-                    {category && (
-                      <td data-cy="ProductCategory">{`${category.icon} - ${category.title}`}</td>
-                    )}
-                    {user && (
-                      <td data-cy="ProductUser" className="has-text-danger">
-                        {user.name}
-                      </td>
-                    )}
-                  </tr>
-                );
-              })}
+                  )}
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
